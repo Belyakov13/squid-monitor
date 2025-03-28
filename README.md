@@ -1,0 +1,2 @@
+# squid-monitor
+Мониторинг squid
