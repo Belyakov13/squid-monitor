@@ -1,0 +1,96 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Главная - Squid Monitor{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col">
+            <div class="btn-group" role="group" aria-label="Период">
+                <a href="?period=day" class="btn btn-{% if period == 'day' %}primary{% else %}secondary{% endif %}">За сутки</a>
+                <a href="?period=month" class="btn btn-{% if period == 'month' %}primary{% else %}secondary{% endif %}">За месяц</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Всего запросов</h5>
+                    <p class="card-text display-6">{{ total_requests }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Общий трафик</h5>
+                    <p class="card-text display-6">{{ total_traffic }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Активных пользователей</h5>
+                    <p class="card-text display-6">{{ active_users }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% if traffic_chart %}
+    <div class="row mb-4">
+        <div class="col">
+            <div class="card">
+                <div class="card-body">
+                    {{ traffic_chart|safe }}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    {% if domains_chart %}
+    <div class="row mb-4">
+        <div class="col">
+            <div class="card">
+                <div class="card-body">
+                    {{ domains_chart|safe }}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<style>
+    .card {
+        margin-bottom: 1rem;
+        box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+        border: none;
+        border-radius: 0.5rem;
+    }
+    .card-title {
+        margin-bottom: 1rem;
+        color: #495057;
+        font-size: 1.1rem;
+        font-weight: 500;
+    }
+    .display-6 {
+        font-size: 2rem;
+        font-weight: 600;
+        color: #2c3e50;
+    }
+    .btn-group {
+        box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+        border-radius: 0.5rem;
+        overflow: hidden;
+    }
+    .btn {
+        padding: 0.5rem 1.5rem;
+    }
+</style>
+{% endblock %}

@@ -1,0 +1,15 @@
+[Unit]
+Description=Squid Monitor Web Application
+After=network.target redis-server.service
+
+[Service]
+User=www-data
+Group=www-data
+WorkingDirectory=/path/to/squidweb
+ExecStart=/usr/local/bin/gunicorn squid_monitor.wsgi:application --workers 4 --threads 2 --bind 0.0.0.0:8000
+Restart=on-failure
+RestartSec=5
+Environment=DJANGO_SETTINGS_MODULE=squid_monitor.settings
+
+[Install]
+WantedBy=multi-user.target

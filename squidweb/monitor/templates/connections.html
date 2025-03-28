@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block title %}Connections - Squid Monitor{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h2>Last Connections</h2>
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Time</th>
+                        <th>IP</th>
+                        <th>URL</th>
+                        <th>Status</th>
+                        <th>Size</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for conn in connections %}
+                    <tr>
+                        <td>{{ conn.time }}</td>
+                        <td><a href="{% url 'user_detail' ip=conn.ip %}">{{ conn.ip }}</a></td>
+                        <td>{{ conn.url }}</td>
+                        <td>{{ conn.status }}</td>
+                        <td>{{ conn.size }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,15 @@
+[Unit]
+Description=Squid Monitor Celery Worker
+After=network.target redis-server.service
+
+[Service]
+User=www-data
+Group=www-data
+WorkingDirectory=/path/to/squidweb
+ExecStart=/usr/local/bin/celery -A squid_monitor worker -l info
+Restart=on-failure
+RestartSec=5
+Environment=DJANGO_SETTINGS_MODULE=squid_monitor.settings
+
+[Install]
+WantedBy=multi-user.target

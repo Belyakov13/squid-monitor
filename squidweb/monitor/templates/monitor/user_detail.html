@@ -1,0 +1,196 @@
+{% extends 'base.html' %}
+
+{% block title %}User {{ user_ip }} - Squid Monitor{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col">
+            <div class="btn-group" role="group" aria-label="Период">
+                <a href="?period=day{% if request.GET.page %}&page={{ request.GET.page }}{% endif %}" 
+                   class="btn btn-{% if period == 'day' %}primary{% else %}secondary{% endif %}">За сутки</a>
+                <a href="?period=month{% if request.GET.page %}&page={{ request.GET.page }}{% endif %}" 
+                   class="btn btn-{% if period == 'month' %}primary{% else %}secondary{% endif %}">За месяц</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col">
+            <h2>Информация о пользователе</h2>
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">IP адрес: {{ user_ip }}</h5>
+                    <p class="card-text">Имя компьютера: {{ hostname }}</p>
+                    <p class="card-text">Всего запросов за период: {{ total_requests }}</p>
+                    <p class="card-text">Общий трафик за период: {{ total_traffic|filesizeformat }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% if traffic_chart %}
+    <div class="row mb-4">
+        <div class="col">
+            <div class="card">
+                <div class="card-body">
+                    {{ traffic_chart|safe }}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    {% if domains_chart %}
+    <div class="row mb-4">
+        <div class="col">
+            <div class="card">
+                <div class="card-body">
+                    {{ domains_chart|safe }}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="row mb-4">
+        <div class="col">
+            <h3>Топ доменов за период</h3>
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Домен</th>
+                            <th>Запросов</th>
+                            <th>Трафик</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for domain, stats in domain_stats %}
+                        <tr>
+                            <td>{{ domain }}</td>
+                            <td>{{ stats.requests }}</td>
+                            <td>{{ stats.traffic|filesizeformat }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col">
+            <h3>История подключений</h3>
+            <div class="table-responsive">
+                <table class="table table-striped table-hover">
+                    <thead>
+                        <tr>
+                            <th style="width: 15%">Время</th>
+                            <th style="width: 10%">Метод</th>
+                            <th style="width: 15%">Домен</th>
+                            <th style="width: 35%">URL</th>
+                            <th style="width: 10%">Статус</th>
+                            <th style="width: 15%">Размер</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for conn in connections %}
+                        <tr>
+                            <td>{{ conn.timestamp|date:"d.m.Y H:i:s" }}</td>
+                            <td>{{ conn.method }}</td>
+                            <td>{{ conn.domain }}</td>
+                            <td class="text-truncate" style="max-width: 400px;">
+                                <span title="{{ conn.url }}">{{ conn.url }}</span>
+                            </td>
+                            <td>
+                                <span class="badge {% if conn.status == 200 %}bg-success{% elif conn.status == 403 %}bg-danger{% elif conn.status == 404 %}bg-warning{% else %}bg-secondary{% endif %}">
+                                    {{ conn.status }}
+                                </span>
+                            </td>
+                            <td>{{ conn.size|filesizeformat }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            {% if connections.has_other_pages %}
+            <nav aria-label="Навигация по страницам" class="mt-4">
+                <ul class="pagination justify-content-center flex-wrap">
+                    {% if connections.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page=1{% if period %}&period={{ period }}{% endif %}">&laquo;&laquo;</a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ connections.previous_page_number }}{% if period %}&period={{ period }}{% endif %}">&laquo;</a>
+                    </li>
+                    {% else %}
+                    <li class="page-item disabled">
+                        <span class="page-link">&laquo;</span>
+                    </li>
+                    {% endif %}
+
+                    {% if connections.number|add:'-4' > 1 %}
+                        <li class="page-item"><a class="page-link" href="?page=1{% if period %}&period={{ period }}{% endif %}">1</a></li>
+                        <li class="page-item disabled"><span class="page-link">...</span></li>
+                    {% endif %}
+
+                    {% for i in connections.paginator.page_range %}
+                        {% if i >= connections.number|add:'-4' and i <= connections.number|add:'4' %}
+                            {% if connections.number == i %}
+                                <li class="page-item active">
+                                    <span class="page-link">{{ i }}</span>
+                                </li>
+                            {% else %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ i }}{% if period %}&period={{ period }}{% endif %}">{{ i }}</a>
+                                </li>
+                            {% endif %}
+                        {% endif %}
+                    {% endfor %}
+
+                    {% if connections.number|add:'4' < connections.paginator.num_pages %}
+                        <li class="page-item disabled"><span class="page-link">...</span></li>
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ connections.paginator.num_pages }}{% if period %}&period={{ period }}{% endif %}">
+                                {{ connections.paginator.num_pages }}
+                            </a>
+                        </li>
+                    {% endif %}
+
+                    {% if connections.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ connections.next_page_number }}{% if period %}&period={{ period }}{% endif %}">&raquo;</a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ connections.paginator.num_pages }}{% if period %}&period={{ period }}{% endif %}">&raquo;&raquo;</a>
+                    </li>
+                    {% else %}
+                    <li class="page-item disabled">
+                        <span class="page-link">&raquo;</span>
+                    </li>
+                    {% endif %}
+                </ul>
+            </nav>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<style>
+.pagination {
+    margin: 20px 0;
+}
+.pagination .page-link {
+    padding: 0.5rem 0.75rem;
+    margin: 0 2px;
+}
+.table td.text-truncate {
+    max-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+</style>
+{% endblock %}

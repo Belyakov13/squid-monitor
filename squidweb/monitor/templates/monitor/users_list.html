@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+
+{% block title %}Пользователи - Squid Monitor{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <h2 class="mb-4">Активные пользователи</h2>
+    
+    <div class="table-responsive">
+        <table class="table table-striped table-hover">
+            <thead>
+                <tr>
+                    <th>IP адрес</th>
+                    <th>Имя компьютера</th>
+                    <th>Запросов за сутки</th>
+                    <th>Трафик за сутки</th>
+                    <th>Запросов за месяц</th>
+                    <th>Трафик за месяц</th>
+                    <th>Последняя активность</th>
+                    <th>Действия</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for user in users %}
+                <tr>
+                    <td>{{ user.ip }}</td>
+                    <td>{{ user.hostname }}</td>
+                    <td>{{ user.day_requests }}</td>
+                    <td>{{ user.day_traffic }}</td>
+                    <td>{{ user.month_requests }}</td>
+                    <td>{{ user.month_traffic }}</td>
+                    <td>{{ user.last_activity|date:"d.m.Y H:i:s" }}</td>
+                    <td>
+                        <a href="{% url 'user_detail' ip=user.ip %}" class="btn btn-sm btn-primary">
+                            Подробнее
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<style>
+    .table {
+        background-color: white;
+        border-radius: 0.5rem;
+        box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    }
+    .table th {
+        border-top: none;
+        background-color: #f8f9fa;
+        color: #495057;
+        font-weight: 500;
+    }
+    .table td {
+        vertical-align: middle;
+    }
+    .btn-sm {
+        border-radius: 0.25rem;
+    }
+</style>
+{% endblock %}

@@ -1,0 +1,82 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Connections - Squid Monitor{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Последние подключения пользователей</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Время</th>
+                                    <th>IP адрес</th>
+                                    <th>Доменное имя</th>
+                                    <th>Домен назначения</th>
+                                    <th>URL</th>
+                                    <th>Метод</th>
+                                    <th>Статус</th>
+                                    <th>Размер</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for conn in connections %}
+                                <tr>
+                                    <td>{{ conn.timestamp|date:"d.m.Y H:i:s" }}</td>
+                                    <td>
+                                        {% if conn.ip %}
+                                            <a href="{% url 'user_detail' ip=conn.ip %}" class="text-decoration-none">
+                                                {{ conn.ip }}
+                                            </a>
+                                        {% else %}
+                                            -
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ conn.hostname }}</td>
+                                    <td>{{ conn.domain }}</td>
+                                    <td>
+                                        <div class="text-truncate" style="max-width: 300px;" title="{{ conn.url }}">
+                                            {{ conn.url }}
+                                        </div>
+                                    </td>
+                                    <td>{{ conn.method }}</td>
+                                    <td>
+                                        <span class="badge {% if conn.status == 'TCP_MISS/200' %}bg-success
+                                                         {% elif '4' in conn.status %}bg-warning
+                                                         {% elif '5' in conn.status %}bg-danger
+                                                         {% else %}bg-info{% endif %}">
+                                            {{ conn.status }}
+                                        </span>
+                                    </td>
+                                    <td>{{ conn.size|filesizeformat }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .table td {
+        vertical-align: middle;
+    }
+    .badge {
+        font-size: 0.8rem;
+        padding: 0.4em 0.6em;
+    }
+    .card {
+        margin-bottom: 1rem;
+    }
+</style>
+{% endblock %}

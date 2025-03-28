@@ -1,0 +1,6 @@
+@echo off
+echo Запуск Celery Worker...
+start cmd /k "cd /d %~dp0 && python -m celery -A squid_monitor worker -l info"
+echo Запуск Celery Beat...
+start cmd /k "cd /d %~dp0 && python -m celery -A squid_monitor beat -l info"
+echo Celery запущен!
